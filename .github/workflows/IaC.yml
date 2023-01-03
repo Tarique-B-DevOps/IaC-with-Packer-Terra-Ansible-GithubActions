@@ -3,7 +3,7 @@ name: Build ready-to-deploy Todo-app AMI & Provision with Terraform
 on:
   push:
     branches:
-        - 'main'
+        - 'prod'
 jobs:
   Packer_AMI_Build:
     runs-on: ubuntu-latest
