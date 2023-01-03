@@ -1,0 +1,68 @@
+name: Build ready-to-deploy Todo-app AMI & Provision with Terraform
+
+on:
+  push:
+    branches:
+        - 'main'
+jobs:
+  Packer_AMI_Build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure AWS credential
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Packer init
+        run: |
+          cd Packer
+          packer init .
+      - name: Packer Validate
+        run: |
+          cd Packer
+          packer validate ami.pkr.hcl    
+      - name: Packer Build AMI & Push
+        run: |
+          cd Packer
+          packer build ami.pkr.hcl    
+  
+  Terraform_Deploy:
+    runs-on: ubuntu-latest
+    needs: [Packer_AMI_Build]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure AWS credential
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+      - name: Terraform Init
+        run: |
+          cd Terraform
+          terraform init
+          
+      - name: Terraform Validate
+        id: validate
+        run: |
+          cd Terraform
+          terraform validate -no-color
+              
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd Terraform
+          terraform plan -no-color -input=false
+        continue-on-error: true
+      - name: Terraform Apply
+        run: |
+          cd Terraform
+          terraform apply -auto-approve -input=false
