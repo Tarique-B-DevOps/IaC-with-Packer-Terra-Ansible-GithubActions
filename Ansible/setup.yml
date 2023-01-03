@@ -1,0 +1,108 @@
+---
+- hosts: default
+  tasks:
+
+  # Update host packages
+
+  - name: Update Remote Host Packages
+    apt:
+      update_cache: true      
+    become: true          
+
+  # Install Nodejs
+
+  - name: Install Nodejs
+    shell: |
+      curl -fsSL https://deb.nodesource.com/setup_19.x | sudo -E bash - &&\
+      sudo apt-get install -y nodejs
+
+  # Install pm2
+
+  - name: Install PM2 Runtime
+    npm:
+      name: pm2
+      global: true
+    become: true        
+
+  # Copy private github private key with proper permission
+
+  - name: Copy Privatekey To Remote Host
+    copy:
+      src: id_rsa
+      dest: ~/.ssh/
+      owner: ubuntu
+      group: ubuntu
+      mode: '600'
+      
+  # Get private project repo
+
+  - name: Checkout Repository
+    git:
+      repo: 'git@github.com:Tarique-B/ToDo-Node.git'
+      dest: /home/ubuntu/ToDo-Node
+      version: main
+      accept_hostkey: true
+      
+  # Install project dependencies    
+
+  - name: Install App Dependencies
+    npm:
+      path: /home/ubuntu/ToDo-Node
+
+  # Start and enable pm2 process at boot time
+ 
+  - name: Start The App Process And Enable The PM2 Systemd Service
+    shell: |
+      cd ~/ToDo-Node
+      pm2 start app.js -n "todo-app"
+      pm2 startup
+      sleep 2
+      sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
+      pm2 save
+      sleep 3
+
+ # Install Nginx
+
+  - name: Install Nginx
+    apt:
+     name: nginx
+     state: present
+    become: true
+
+ # Transfer Config
+        
+  - name: Transfer Nginx Proxy Config File
+    template:
+      src: nginx.conf
+      dest: /etc/nginx/sites-enabled/
+    become: true
+
+ #  Delete Default Config  
+
+  - name: Delete Default Nginx Config
+    file: 
+      path: /etc/nginx/sites-enabled/default 
+      state: absent
+    become: true
+    notify:
+      - Restart Nginx Service      
+    
+# Install Additional tools
+
+  - name: Install Other Tools
+    apt:
+     pkg:
+     - zip
+     - unzip
+     - net-tools
+    become: true
+
+ # Handler
+
+  handlers:
+    - name: Restart Nginx Service
+      service:
+        name: nginx
+        state: restarted
+      become: true    
+...
