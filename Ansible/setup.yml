@@ -9,7 +9,7 @@
       update_cache: true      
     become: true          
 
-  # Install Nodejs
+  # Install NodeJS
 
   - name: Install Nodejs
     shell: |
