@@ -18,7 +18,7 @@
 ![Screenshot (14)](https://user-images.githubusercontent.com/86839948/210515701-eaf39831-a27b-4d16-b016-894798acb539.jpg)
 
 
-
+----------
 
 - ## Access Application on Load Balancer's URL
 
