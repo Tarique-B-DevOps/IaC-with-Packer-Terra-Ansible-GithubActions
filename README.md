@@ -8,6 +8,11 @@
 #### **Github Actions** = Used for CI/CD pipeline for automating the AMI building and deployment process.
 ----------
 
+# Architecture :
+
+![Architecture2](https://user-images.githubusercontent.com/86839948/210767757-a1ef9e7c-77c1-492e-be3f-3e054dbaeb12.jpg)
+
+
 # Screenshots :
 
 - ## Github Actions Workflow : [Click Here For Summary](https://github.com/Tarique-B/IaC-with-Packer-Terra-Ansible-GithubActions/actions/runs/3831941576)
