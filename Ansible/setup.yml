@@ -2,7 +2,7 @@
 - hosts: default
   tasks:
 
-  # Update host packages
+  # Update remote node packages
 
   - name: Update Remote Host Packages
     apt:
