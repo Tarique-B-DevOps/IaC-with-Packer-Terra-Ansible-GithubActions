@@ -26,7 +26,7 @@
 
 ----------
 
-- ## Access Application on Load Balancer's URL
+- ## Access Application on Load Balancer URL
 
 
 
